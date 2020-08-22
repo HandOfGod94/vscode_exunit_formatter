@@ -1,6 +1,8 @@
 defmodule VSCodeExUnitFormatter do
   use GenServer
 
+  import VSCodeExUnitFormatter.ModuleHelpers
+
   @impl true
   def init(_opts) do
     tests = %{
@@ -27,10 +29,20 @@ defmodule VSCodeExUnitFormatter do
   end
 
   def handle_cast({:module_started, test_module}, tests) do
+    vscode_tests =
+      for test <- test_module.tests, into: [] do
+        %{
+          type: "test",
+          id: "testid",
+          label: test.name
+        }
+      end
+
     vscode_suite = %{
       type: "suite",
-      id: "foo",
-      label: test_module.name
+      id: module_id(test_module.name),
+      label: to_elixir_module(test_module.name),
+      children: vscode_tests
     }
 
     tests = %{tests | children: [vscode_suite | tests.children]}
