@@ -32,7 +32,7 @@ defmodule VSCodeExUnitFormatter do
     {:noreply, root_test_suite}
   end
 
-  def handle_cast({:module_started, test_module}, root_test_suite) do
+  def handle_cast({:module_started, %ExUnit.TestModule{} = test_module}, root_test_suite) do
     vscode_tests =
       for test <- test_module.tests, into: [] do
         %{

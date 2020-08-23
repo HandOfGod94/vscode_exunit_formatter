@@ -5,7 +5,7 @@ defmodule VSCodeExUnitFormatter.MixProject do
     [
       app: :vscode_exunit_formatter,
       version: "0.1.0",
-      elixir: "~> 1.10",
+      elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -22,7 +22,6 @@ defmodule VSCodeExUnitFormatter.MixProject do
   defp deps do
     [
       {:jason, "~> 1.2"},
-      {:recase, "~> 0.5"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
