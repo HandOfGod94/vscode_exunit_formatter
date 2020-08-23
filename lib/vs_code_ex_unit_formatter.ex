@@ -3,6 +3,9 @@ defmodule VSCodeExUnitFormatter do
 
   import VSCodeExUnitFormatter.ModuleHelpers
 
+  import ExUnit.Formatter,
+    only: [format_test_failure: 5]
+
   @impl true
   def init(_opts) do
     root_test_suite = %{
@@ -39,6 +42,7 @@ defmodule VSCodeExUnitFormatter do
           file: test.tags.file,
           errored: false,
           skipped: false,
+          message: "",
           line: test.tags.line
         }
       end
@@ -55,21 +59,7 @@ defmodule VSCodeExUnitFormatter do
     {:noreply, root_test_suite}
   end
 
-  def handle_cast({:module_finished, %ExUnit.TestModule{} = test_module}, root_test_suite) do
-    has_errored_state? = Enum.any?(test_module.tests, fn %{state: state} -> state == :failed end)
-
-    updated_children =
-      if has_errored_state? do
-        Enum.map(root_test_suite.children, fn suite ->
-          if suite.id == test_module.name,
-            do: %{suite | errored: true},
-            else: suite
-        end)
-      else
-        root_test_suite.children
-      end
-
-    root_test_suite = %{root_test_suite | children: updated_children}
+  def handle_cast({:module_finished, _test_module}, root_test_suite) do
     {:noreply, root_test_suite}
   end
 
@@ -85,8 +75,21 @@ defmodule VSCodeExUnitFormatter do
         tests =
           Enum.reduce(suite.children, [], fn current_test, suite ->
             if current_test.id == test_id do
-              current_test = %{current_test | skipped: match?({:skipped, _}, test.state) }
-              current_test = %{current_test | errored: match?({:failed, _}, test.state) }
+              current_test = %{current_test | skipped: match?({:skipped, _}, test.state)}
+              current_test = %{current_test | errored: match?({:failed, _}, test.state)}
+
+              current_test =
+                case test.state do
+                  {:failed, failures} ->
+                    message =
+                      format_test_failure(test, failures, 1, 80, &formatter(&1, &2))
+
+                    %{current_test | message: message}
+
+                  _ ->
+                    current_test
+                end
+
               [current_test | suite]
             else
               [current_test | suite]
@@ -108,4 +111,8 @@ defmodule VSCodeExUnitFormatter do
   def handle_cast({:case_finished, _test}, root_test_suite) do
     {:noreply, root_test_suite}
   end
+
+  defp formatter(:error_info, msg), do: msg
+
+  defp formatter(_, msg), do: msg
 end
