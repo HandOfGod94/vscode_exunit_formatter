@@ -39,7 +39,7 @@ defmodule VSCodeExUnitFormatter do
           file: test.tags.file,
           errored: false,
           skipped: false,
-          line: test.tags.line - 1
+          line: test.tags.line
         }
       end
 
@@ -73,11 +73,31 @@ defmodule VSCodeExUnitFormatter do
     {:noreply, root_test_suite}
   end
 
-  def handle_cast({:test_started, test}, root_test_suite) do
+  def handle_cast({:test_started, _test}, root_test_suite) do
     {:noreply, root_test_suite}
   end
 
-  def handle_cast({:test_finished, _test}, root_test_suite) do
+  def handle_cast({:test_finished, %ExUnit.Test{} = test}, root_test_suite) do
+    test_id = Base.encode16(Atom.to_string(test.name))
+
+    root_test_suite_children =
+      Enum.reduce(root_test_suite.children, [], fn suite, root_children ->
+        tests =
+          Enum.reduce(suite.children, [], fn current_test, suite ->
+            if current_test.id == test_id do
+              current_test = %{current_test | skipped: match?({:skipped, _}, test.state) }
+              current_test = %{current_test | errored: match?({:failed, _}, test.state) }
+              [current_test | suite]
+            else
+              [current_test | suite]
+            end
+          end)
+
+        new_suite = %{suite | children: tests}
+        [new_suite | root_children]
+      end)
+
+    root_test_suite = %{root_test_suite | children: root_test_suite_children}
     {:noreply, root_test_suite}
   end
 
