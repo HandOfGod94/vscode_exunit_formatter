@@ -2,9 +2,9 @@ defmodule VSCodeExUnitFormatter do
   use GenServer
 
   import VSCodeExUnitFormatter.ModuleHelpers
+  import ExUnit.Formatter, only: [format_test_failure: 5]
 
-  import ExUnit.Formatter,
-    only: [format_test_failure: 5]
+  @moduledoc false
 
   @impl true
   def init(_opts) do
@@ -47,11 +47,19 @@ defmodule VSCodeExUnitFormatter do
         }
       end
 
+    file =
+      if vscode_tests != [] do
+        vscode_tests |> Enum.at(0) |> Map.get(:file)
+      else
+        ""
+      end
+
     vscode_suite = %{
       type: "suite",
       id: test_module.name,
       label: to_elixir_module(test_module.name),
       children: vscode_tests,
+      file: file,
       errored: false
     }
 
@@ -70,37 +78,25 @@ defmodule VSCodeExUnitFormatter do
   def handle_cast({:test_finished, %ExUnit.Test{} = test}, root_test_suite) do
     test_id = Base.encode16(Atom.to_string(test.name))
 
-    root_test_suite_children =
-      Enum.reduce(root_test_suite.children, [], fn suite, root_children ->
-        tests =
-          Enum.reduce(suite.children, [], fn current_test, suite ->
-            if current_test.id == test_id do
-              current_test = %{current_test | skipped: match?({:skipped, _}, test.state)}
-              current_test = %{current_test | errored: match?({:failed, _}, test.state)}
-
-              current_test =
-                case test.state do
-                  {:failed, failures} ->
-                    message =
-                      format_test_failure(test, failures, 1, 80, &formatter(&1, &2))
-
-                    %{current_test | message: message}
-
-                  _ ->
-                    current_test
+    root_suite_children =
+      Enum.map(root_test_suite.children, fn suite ->
+        %{
+          suite
+          | children:
+              Enum.map(suite.children, fn vs_test ->
+                with %{id: id} when id == test_id <- vs_test,
+                     %{state: {:failed, reason}} <- test do
+                  message = format_test_failure(test, reason, 1, 80, &formatter(&1, &2))
+                  %{vs_test | message: message, errored: true}
+                else
+                  %{state: {:skipped, _}} -> %{vs_test | skipped: true}
+                  _ -> vs_test
                 end
-
-              [current_test | suite]
-            else
-              [current_test | suite]
-            end
-          end)
-
-        new_suite = %{suite | children: tests}
-        [new_suite | root_children]
+              end)
+        }
       end)
 
-    root_test_suite = %{root_test_suite | children: root_test_suite_children}
+    root_test_suite = %{root_test_suite | children: root_suite_children}
     {:noreply, root_test_suite}
   end
 
