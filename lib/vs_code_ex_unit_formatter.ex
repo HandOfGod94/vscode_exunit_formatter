@@ -1,7 +1,6 @@
 defmodule VSCodeExUnitFormatter do
   use GenServer
 
-  import VSCodeExUnitFormatter.ModuleHelpers
   import ExUnit.Formatter, only: [format_test_failure: 5]
 
   alias VSCodeExUnitFormatter.VsSuite
@@ -27,8 +26,8 @@ defmodule VSCodeExUnitFormatter do
   end
 
   def handle_cast({:module_started, %ExUnit.TestModule{} = test_module}, root_test_suite) do
-    vscode_suite = VSCodeExUnitFormatter.VsSuite.populate_suite(test_module)
-    root_test_suite = %{root_test_suite | children: [vscode_suite | root_test_suite.children]}
+    vscode_suite = VsSuite.populate_suite(test_module)
+    root_test_suite = VsSuite.append_child_suite(root_test_suite, vscode_suite)
     {:noreply, root_test_suite}
   end
 

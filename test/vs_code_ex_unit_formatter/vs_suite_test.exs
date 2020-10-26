@@ -38,4 +38,26 @@ defmodule VSCodeExUnitFormatter.VsSuiteTest do
       assert match?([%VsTestCase{} | _], tests)
     end
   end
+
+  describe "append_child_suite/2" do
+    test "appends child suite to parent" do
+      parent_test_module = @exunit_module
+      child_test_module = %{@exunit_module | tests: [@exunit_test]}
+
+      parent_suite = VsSuite.populate_suite(parent_test_module)
+      child_suite = VsSuite.populate_suite(child_test_module)
+
+      assert %VsSuite{children: suite} = VsSuite.append_child_suite(parent_suite, child_suite)
+      assert match?([%VsSuite{} | _], suite)
+      assert match?([%VsTestCase{} | _], hd(suite).children)
+    end
+  end
+
+  test "append_child_tests/2 - appends list of tests to a suite" do
+    test_suite = VsSuite.populate_suite(@exunit_module)
+    test_cases = [VsTestCase.populate_test(@exunit_test), VsTestCase.populate_test(@exunit_test)]
+
+    assert %VsSuite{children: tests} = VsSuite.append_child_tests(test_suite, test_cases)
+    assert match?([%VsTestCase{}, %VsTestCase{}], tests)
+  end
 end
