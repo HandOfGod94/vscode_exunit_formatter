@@ -2,22 +2,15 @@
 
 > WIP
 
-## Installation
+## Dev setup
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `vscode_exunit_formatter` to your list of dependencies in `mix.exs`:
+```sh
+# create archive
+mix do archive.build, archive.install
 
-> This is to be used with `Test Explorer UI`, coming soon.
-
-```elixir
-def deps do
-  [
-    {:vscode_exunit_formatter, "~> 0.1.0"}
-  ]
-end
+# to run with test formatter
+mix test --formatter VSCodeExUnitFormatter
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/vscode_exunit_formatter](https://hexdocs.pm/vscode_exunit_formatter).
-
+> This reporter has to be used in conjunction with
+> [vscode-exunit-test-adapter](https://github.com/HandOfGod94/vscode-exunit-test-adapter)

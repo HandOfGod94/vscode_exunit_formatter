@@ -4,18 +4,12 @@ defmodule VSCodeExUnitFormatter do
   import VSCodeExUnitFormatter.ModuleHelpers
   import ExUnit.Formatter, only: [format_test_failure: 5]
 
+  alias VSCodeExUnitFormatter.VsSuite
   @moduledoc false
 
   @impl true
   def init(_opts) do
-    root_test_suite = %{
-      type: "suite",
-      id: "root",
-      label: "ExUnit",
-      errored: false,
-      children: []
-    }
-
+    root_test_suite = %VsSuite{id: "root", label: "ExUnit"}
     {:ok, root_test_suite}
   end
 
@@ -33,36 +27,7 @@ defmodule VSCodeExUnitFormatter do
   end
 
   def handle_cast({:module_started, %ExUnit.TestModule{} = test_module}, root_test_suite) do
-    vscode_tests =
-      for test <- test_module.tests, into: [] do
-        %{
-          type: "test",
-          id: Base.encode16(Atom.to_string(test.name)),
-          label: test.name,
-          file: test.tags.file,
-          errored: false,
-          skipped: false,
-          message: "",
-          line: test.tags.line
-        }
-      end
-
-    file =
-      if vscode_tests != [] do
-        vscode_tests |> Enum.at(0) |> Map.get(:file)
-      else
-        ""
-      end
-
-    vscode_suite = %{
-      type: "suite",
-      id: test_module.name,
-      label: to_elixir_module(test_module.name),
-      children: vscode_tests,
-      file: file,
-      errored: false
-    }
-
+    vscode_suite = VSCodeExUnitFormatter.VsSuite.populate_suite(test_module)
     root_test_suite = %{root_test_suite | children: [vscode_suite | root_test_suite.children]}
     {:noreply, root_test_suite}
   end
