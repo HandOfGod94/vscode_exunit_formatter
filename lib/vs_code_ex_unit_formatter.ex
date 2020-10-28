@@ -2,8 +2,8 @@ defmodule VSCodeExUnitFormatter do
   @moduledoc false
 
   use GenServer
-  import ExUnit.Formatter, only: [format_test_failure: 5]
   alias VSCodeExUnitFormatter.VsSuite
+  alias VSCodeExUnitFormatter.VsTestCase
 
   @impl GenServer
   def init(_opts) do
@@ -43,20 +43,7 @@ defmodule VSCodeExUnitFormatter do
 
     root_suite_children =
       Enum.map(root_test_suite.children, fn suite ->
-        %{
-          suite
-          | children:
-              Enum.map(suite.children, fn vs_test ->
-                with %{id: id} when id == test_id <- vs_test,
-                     %{state: {:failed, reason}} <- test do
-                  message = format_test_failure(test, reason, 1, 80, &formatter(&1, &2))
-                  %{vs_test | message: message, errored: true}
-                else
-                  %{state: {:skipped, _}} -> %{vs_test | skipped: true}
-                  _ -> vs_test
-                end
-              end)
-        }
+        %{suite | children: update_test_state(suite, test, test_id)}
       end)
 
     root_test_suite = %{root_test_suite | children: root_suite_children}
@@ -71,7 +58,9 @@ defmodule VSCodeExUnitFormatter do
     {:noreply, root_test_suite}
   end
 
-  defp formatter(:error_info, msg), do: msg
-
-  defp formatter(_, msg), do: msg
+  defp update_test_state(%VsSuite{} = suite, %ExUnit.Test{} = test, test_id) do
+    suite.children
+    |> Enum.filter(fn vs_test -> vs_test.id == test_id end)
+    |> Enum.map(&VsTestCase.update_state_from_exunit(&1, test))
+  end
 end

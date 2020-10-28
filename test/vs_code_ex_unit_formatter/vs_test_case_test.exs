@@ -35,4 +35,35 @@ defmodule VSCodeExUnitFormatter.VsTestCaseTest do
              }
     end
   end
+
+  describe "update_state_from_exunit/2" do
+    test "updates vs_test state to skipped when exunit test is skipped" do
+      vs_test = VsTestCase.new(@exunit_test)
+      test_case = %{@exunit_test | state: {:skipped, "this is skipped"}}
+
+      updated_vs_test = VsTestCase.update_state_from_exunit(vs_test, test_case)
+      assert updated_vs_test.skipped == true
+    end
+
+    test "updates vs_test state to error when exunit test is errored" do
+      vs_test = VsTestCase.new(@exunit_test)
+
+      test_case = %{
+        @exunit_test
+        | state: {:failed, [{:error, "I failed", []}]},
+          module: @exunit_module
+      }
+
+      updated_vs_test = VsTestCase.update_state_from_exunit(vs_test, test_case)
+      assert updated_vs_test.errored == true
+      assert updated_vs_test.message =~ "I failed"
+    end
+
+    test "vs_test state remains same when exunit passes" do
+      vs_test = VsTestCase.new(@exunit_test)
+      test_case = %{@exunit_test | state: nil}
+      updated_vs_test = VsTestCase.update_state_from_exunit(vs_test, test_case)
+      assert vs_test == updated_vs_test
+    end
+  end
 end
