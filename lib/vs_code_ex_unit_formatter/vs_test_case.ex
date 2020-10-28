@@ -11,7 +11,7 @@ defmodule VSCodeExUnitFormatter.VsTestCase do
     errored: false
   ]
 
-  def populate_test(%ExUnit.Test{} = test_case) do
+  def new(%ExUnit.Test{} = test_case) do
     %__MODULE__{
       type: "test",
       id: Base.encode16(Atom.to_string(test_case.name)),

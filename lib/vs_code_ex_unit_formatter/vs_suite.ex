@@ -6,10 +6,10 @@ defmodule VSCodeExUnitFormatter.VsSuite do
   @derive Jason.Encoder
   defstruct [:id, :label, type: "suite", children: [], file: "", errored: false]
 
-  def populate_suite(%TestModule{} = test_module) do
+  def new(%TestModule{} = test_module) do
     vscode_tests =
       test_module.tests
-      |> Enum.map(&VsTestCase.populate_test/1)
+      |> Enum.map(&VsTestCase.new/1)
       |> Enum.into([])
 
     %__MODULE__{

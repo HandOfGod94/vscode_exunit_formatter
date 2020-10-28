@@ -20,9 +20,9 @@ defmodule VSCodeExUnitFormatter.VsTestCaseTest do
     logs: ""
   }
 
-  describe "populate/1" do
+  describe "new/1" do
     test "creates vscode test format struct" do
-      assert VsTestCase.populate_test(@exunit_test) == %VsTestCase{
+      assert VsTestCase.new(@exunit_test) == %VsTestCase{
                errored: false,
                file:
                  "/Users/gahanrakholia/workspace/nuke/vscode_exunit_formatter/test/vs_code_ex_unit_formatter/vs_test_case_test.exs",

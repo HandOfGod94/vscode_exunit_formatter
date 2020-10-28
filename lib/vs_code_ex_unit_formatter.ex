@@ -25,7 +25,7 @@ defmodule VSCodeExUnitFormatter do
   end
 
   def handle_cast({:module_started, %ExUnit.TestModule{} = test_module}, root_test_suite) do
-    vscode_suite = VsSuite.populate_suite(test_module)
+    vscode_suite = VsSuite.new(test_module)
     root_test_suite = VsSuite.append_child_suite(root_test_suite, vscode_suite)
     {:noreply, root_test_suite}
   end

@@ -3,7 +3,7 @@ defmodule VSCodeExUnitFormatterTest do
   import ExUnit.CaptureIO
 
   alias VSCodeExUnitFormatter.VsSuite
-  alias VsCodeExUnitFromatter.VsTestCase
+  alias VSCodeExUnitFormatter.VsTestCase
 
   @exunit_module %ExUnit.TestModule{
     name: :"Elixir.Example.Fizz",

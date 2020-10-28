@@ -21,9 +21,9 @@ defmodule VSCodeExUnitFormatter.VsSuiteTest do
     logs: ""
   }
 
-  describe "populate_suite/1" do
+  describe "new/1" do
     test "when there are not tests in suite" do
-      assert VsSuite.populate_suite(@exunit_module) == %VsSuite{
+      assert VsSuite.new(@exunit_module) == %VsSuite{
                type: "suite",
                id: Example.Fizz,
                label: :"Example.Fizz",
@@ -35,7 +35,7 @@ defmodule VSCodeExUnitFormatter.VsSuiteTest do
 
     test "returns VScode test adapter format attrubutes when there are tests in suite" do
       test_module = %{@exunit_module | tests: [@exunit_test]}
-      assert %VsSuite{children: tests} = VsSuite.populate_suite(test_module)
+      assert %VsSuite{children: tests} = VsSuite.new(test_module)
       assert match?([%VsTestCase{} | _], tests)
     end
   end
@@ -45,8 +45,8 @@ defmodule VSCodeExUnitFormatter.VsSuiteTest do
       parent_test_module = @exunit_module
       child_test_module = %{@exunit_module | tests: [@exunit_test]}
 
-      parent_suite = VsSuite.populate_suite(parent_test_module)
-      child_suite = VsSuite.populate_suite(child_test_module)
+      parent_suite = VsSuite.new(parent_test_module)
+      child_suite = VsSuite.new(child_test_module)
 
       assert %VsSuite{children: suite} = VsSuite.append_child_suite(parent_suite, child_suite)
       assert match?([%VsSuite{} | _], suite)
@@ -55,8 +55,8 @@ defmodule VSCodeExUnitFormatter.VsSuiteTest do
   end
 
   test "append_child_tests/2 - appends list of tests to a suite" do
-    test_suite = VsSuite.populate_suite(@exunit_module)
-    test_cases = [VsTestCase.populate_test(@exunit_test), VsTestCase.populate_test(@exunit_test)]
+    test_suite = VsSuite.new(@exunit_module)
+    test_cases = [VsTestCase.new(@exunit_test), VsTestCase.new(@exunit_test)]
 
     assert %VsSuite{children: tests} = VsSuite.append_child_tests(test_suite, test_cases)
     assert match?([%VsTestCase{}, %VsTestCase{}], tests)
