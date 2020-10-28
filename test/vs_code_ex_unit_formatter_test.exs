@@ -103,5 +103,19 @@ defmodule VSCodeExUnitFormatterTest do
       assert %{children: [test_case | _]} = suite
       assert test_case.skipped == true
     end
+
+    test "number of tests remains same before and after test runs",
+         %{root_test_suite: root_test_suite} do
+      unit_test_1 = %{@exunit_test | name: :"fist one", module: @exunit_module}
+      unit_test_2 = %{@exunit_test | state: {:skipped, "this is skipped"}, module: @exunit_module}
+      test_module = %{@exunit_module | tests: [unit_test_1, unit_test_2]}
+
+      {:noreply, root} =
+        VSCodeExUnitFormatter.handle_cast({:module_started, test_module}, root_test_suite)
+
+      {:noreply, result} = VSCodeExUnitFormatter.handle_cast({:test_finished, unit_test_2}, root)
+      assert %{children: children} = result
+      assert length(hd(children).children) == length(hd(root.children).children)
+    end
   end
 end

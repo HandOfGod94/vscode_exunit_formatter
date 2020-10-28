@@ -24,22 +24,19 @@ defmodule VSCodeExUnitFormatter.VsTestCase do
     }
   end
 
-  def update_state_from_exunit(
-        %__MODULE__{} = vs_test,
-        %ExUnit.Test{state: {:skipped, _}} = _test
-      ) do
-    %{vs_test | skipped: true}
-  end
+  def update_state_from_exunit(%__MODULE__{} = vs_test, %ExUnit.Test{} = exunit_test) do
+    case exunit_test do
+      %{state: {:skipped, _}} ->
+        %{vs_test | skipped: true}
 
-  def update_state_from_exunit(
-        %__MODULE__{} = vs_test,
-        %ExUnit.Test{state: {:failed, reason}} = exunit_test
-      ) do
-    message = format_test_failure(exunit_test, reason, 1, 80, &formatter(&1, &2))
-    %{vs_test | message: message, errored: true}
-  end
+      %{state: {:failed, reason}} ->
+        message = format_test_failure(exunit_test, reason, 1, 80, &formatter(&1, &2))
+        %{vs_test | errored: true, message: message}
 
-  def update_state_from_exunit(vs_test, _), do: vs_test
+      _ ->
+        vs_test
+    end
+  end
 
   defp formatter(:error_info, msg), do: msg
 

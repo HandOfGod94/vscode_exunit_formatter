@@ -22,17 +22,18 @@ defmodule VSCodeExUnitFormatter.VsTestCaseTest do
 
   describe "new/1" do
     test "creates vscode test format struct" do
-      assert VsTestCase.new(@exunit_test) == %VsTestCase{
+      assert %VsTestCase{
                errored: false,
-               file:
-                 "/Users/gahanrakholia/workspace/nuke/vscode_exunit_formatter/test/vs_code_ex_unit_formatter/vs_test_case_test.exs",
+               file: file,
                id: "7465737420666F6F20626172",
                label: :"test foo bar",
                line: 15,
                message: "",
                skipped: false,
                type: "test"
-             }
+             } = VsTestCase.new(@exunit_test)
+
+      assert file != ""
     end
   end
 

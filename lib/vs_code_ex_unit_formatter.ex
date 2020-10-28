@@ -42,8 +42,8 @@ defmodule VSCodeExUnitFormatter do
     test_id = Base.encode16(Atom.to_string(test.name))
 
     root_suite_children =
-      Enum.map(root_test_suite.children, fn suite ->
-        %{suite | children: update_test_state(suite, test, test_id)}
+      Enum.map(root_test_suite.children, fn %{children: testcases} = suite ->
+        %{suite | children: update_test_state(testcases, test, test_id)}
       end)
 
     root_test_suite = %{root_test_suite | children: root_suite_children}
@@ -58,9 +58,14 @@ defmodule VSCodeExUnitFormatter do
     {:noreply, root_test_suite}
   end
 
-  defp update_test_state(%VsSuite{} = suite, %ExUnit.Test{} = test, test_id) do
-    suite.children
-    |> Enum.filter(fn vs_test -> vs_test.id == test_id end)
-    |> Enum.map(&VsTestCase.update_state_from_exunit(&1, test))
+  defp update_test_state(testcases, %ExUnit.Test{} = exunit_test, test_id)
+       when is_list(testcases) do
+    Enum.map(testcases, fn
+      %{id: id} = vs_test when id == test_id ->
+        VsTestCase.update_state_from_exunit(vs_test, exunit_test)
+
+      vs_test ->
+        vs_test
+    end)
   end
 end
