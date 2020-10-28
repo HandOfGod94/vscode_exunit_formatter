@@ -4,6 +4,11 @@
 
 [![pipeline](https://github.com/HandOfGod94/vscode_exunit_formatter/workflows/pipeline/badge.svg)](https://github.com/HandOfGod94/vscode_exunit_formatter/actions?query=workflow%3Apipeline)
 
+## Overview
+
+VSCode Test extension is useful to run and debug tests quickly across any project for any language.
+This project aims to format test results in such a way that test adapter can recognize it and thus enables
+running tests from VSCode test adapter.
 
 ## Dev setup
 
