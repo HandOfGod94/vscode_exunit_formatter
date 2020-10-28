@@ -23,4 +23,5 @@ erl_crash.dump
 vscode_exunit_formatter-*.tar
 
 .vscode
-
+.elixir_ls/
+cover/

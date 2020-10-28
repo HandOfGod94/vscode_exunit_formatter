@@ -54,8 +54,40 @@ defmodule VSCodeExUnitFormatterTest do
   end
 
   describe "test_finished event" do
-    test "for successful testcase"
-    test "for errored testcase"
+    test "for successful testcase", %{root_test_suite: root_test_suite} do
+      test_module = %{@exunit_module | tests: [@exunit_test]}
+      unit_test = %{@exunit_test | module: @exunit_module}
+
+      {:noreply, root} =
+        VSCodeExUnitFormatter.handle_cast({:module_started, test_module}, root_test_suite)
+
+      {:noreply, result} = VSCodeExUnitFormatter.handle_cast({:test_finished, unit_test}, root)
+
+      assert %{children: [suite | _]} = result
+      assert %{children: [test_case | _]} = suite
+      assert test_case.errored == false
+      assert test_case.skipped == false
+      assert test_case.message =~ ""
+    end
+
+    test "for errored testcase", %{root_test_suite: root_test_suite} do
+      test_module = %{@exunit_module | tests: [@exunit_test]}
+
+      unit_test = %{
+        @exunit_test
+        | state: {:failed, [{:error, "I failed", []}]},
+          module: @exunit_module
+      }
+
+      {:noreply, root} =
+        VSCodeExUnitFormatter.handle_cast({:module_started, test_module}, root_test_suite)
+
+      {:noreply, result} = VSCodeExUnitFormatter.handle_cast({:test_finished, unit_test}, root)
+      assert %{children: [suite | _]} = result
+      assert %{children: [test_case | _]} = suite
+      assert test_case.errored == true
+      assert test_case.message =~ "I failed"
+    end
 
     test "for skipped testcase", %{root_test_suite: root_test_suite} do
       test_module = %{@exunit_module | tests: [@exunit_test]}
@@ -66,14 +98,9 @@ defmodule VSCodeExUnitFormatterTest do
 
       {:noreply, result} = VSCodeExUnitFormatter.handle_cast({:test_finished, unit_test}, root)
 
-      assert true ==
-               result.children
-               |> Enum.at(0)
-               |> Map.get(:children)
-               |> Enum.at(0)
-               |> Map.get(:skipped)
+      assert %{children: [suite | _]} = result
+      assert %{children: [test_case | _]} = suite
+      assert test_case.skipped == true
     end
-
-    test "captures error stacktrace as message when test fails"
   end
 end
