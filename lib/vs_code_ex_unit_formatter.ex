@@ -1,18 +1,17 @@
 defmodule VSCodeExUnitFormatter do
-  use GenServer
-
-  import ExUnit.Formatter, only: [format_test_failure: 5]
-
-  alias VSCodeExUnitFormatter.VsSuite
   @moduledoc false
 
-  @impl true
+  use GenServer
+  import ExUnit.Formatter, only: [format_test_failure: 5]
+  alias VSCodeExUnitFormatter.VsSuite
+
+  @impl GenServer
   def init(_opts) do
     root_test_suite = %VsSuite{id: "root", label: "ExUnit"}
     {:ok, root_test_suite}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:suite_started, _opts}, root_test_suite) do
     {:noreply, root_test_suite}
   end

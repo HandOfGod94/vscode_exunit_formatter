@@ -1,7 +1,8 @@
 defmodule VSCodeExUnitFormatter.VsSuiteTest do
   use ExUnit.Case
   doctest VSCodeExUnitFormatter.VsSuite
-  alias VSCodeExUnitFormatter.{VsSuite, VsTestCase}
+  alias VSCodeExUnitFormatter.VsSuite
+  alias VSCodeExUnitFormatter.VsTestCase
 
   @exunit_module %ExUnit.TestModule{
     name: :"Elixir.Example.Fizz",

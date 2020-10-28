@@ -1,7 +1,7 @@
 defmodule VSCodeExUnitFormatter.VsSuite do
   import VSCodeExUnitFormatter.ModuleHelpers
-  alias VSCodeExUnitFormatter.VsTestCase
   alias ExUnit.TestModule
+  alias VSCodeExUnitFormatter.VsTestCase
 
   @derive Jason.Encoder
   defstruct [:id, :label, type: "suite", children: [], file: "", errored: false]

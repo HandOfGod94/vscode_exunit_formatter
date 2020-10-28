@@ -2,7 +2,8 @@ defmodule VSCodeExUnitFormatterTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
 
-  alias VSCodeExUnitFormatter.{VsSuite, VsTestCase}
+  alias VSCodeExUnitFormatter.VsSuite
+  alias VsCodeExUnitFromatter.VsTestCase
 
   @exunit_module %ExUnit.TestModule{
     name: :"Elixir.Example.Fizz",
