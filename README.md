@@ -1,8 +1,9 @@
 # VSCodeExUnitFormatter
 
-> WIP
-
 [![pipeline](https://github.com/HandOfGod94/vscode_exunit_formatter/workflows/pipeline/badge.svg)](https://github.com/HandOfGod94/vscode_exunit_formatter/actions?query=workflow%3Apipeline)
+[![codecov](https://codecov.io/gh/HandOfGod94/vscode_exunit_formatter/branch/master/graph/badge.svg?token=IWHKKFA29Q)](https://codecov.io/gh/HandOfGod94/vscode_exunit_formatter)
+
+> WIP
 
 ## Overview
 
