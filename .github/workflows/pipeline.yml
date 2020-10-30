@@ -1,5 +1,9 @@
 name: pipeline
 
+env:
+  ELIXIR_VERSION: 1.10.3
+  OTP_VERSION: 22.3
+
 on:
   push:
     branches: [ master ]
@@ -17,8 +21,8 @@ jobs:
     - name: Set up Elixir
       uses: actions/setup-elixir@v1
       with:
-        elixir-version: '1.10.3' # Define the elixir version [required]
-        otp-version: '22.3' # Define the OTP version [required]
+        elixir-version: ${{ env.ELIXIR_VERSION }}
+        otp-version: ${{ env.OTP_VERSION }}
     - name: Restore dependencies cache
       uses: actions/cache@v2
       with:
@@ -32,4 +36,6 @@ jobs:
     - name: Run credo
       run: mix credo --strict
     - name: Run tests
-      run: mix test --cover
+      run: |
+        mix coveralls.json
+        bash <(curl -s https://codecov.io/bash)
